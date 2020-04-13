@@ -23,6 +23,10 @@ Figure::Figure(std::string name) : name(name) {
     //impacted.reserve(32);
 }
 
+Figure::~Figure()
+{
+}
+
 bool Figure::increaseAttackedState(FieldPointer fieldPtr, Board* board) {
 
     if (markImpactedFields(fieldPtr, board)) {

@@ -22,6 +22,8 @@ public:
 
     Figure(std::string name);
 
+    ~Figure();
+
     std::string name;
 
  //   bool increaseAttackedState(std::pair<int, int> position, Board* board);
