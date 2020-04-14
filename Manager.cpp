@@ -1,12 +1,12 @@
 #include "Manager.h"
 
-Manager::Manager() {
-	noOfThreads = std::thread::hardware_concurrency() - 1;
-	//if (noOfThreads == 0) noOfThreads = 3;
-}
-Manager::~Manager()
+Manager::Manager()
 {
+	noOfThreads = std::thread::hardware_concurrency() - 1;
 }
+
+Manager::~Manager(){}
+
 void Manager::work() {
 
 	initializer.getInput();
@@ -64,4 +64,3 @@ int Manager::cols()
 {
 	return initializer.boardDimensions.second;
 }
-

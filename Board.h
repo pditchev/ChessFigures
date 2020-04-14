@@ -5,7 +5,6 @@
 #include "FieldPointer.h"
 #include "Field.h"
 
-//using FieldPtr = std::pair<size_t, size_t>;
 
 enum class PieceColor {black, white};
 
@@ -53,4 +52,3 @@ public:
 
 	FieldPointer end();
 };
-

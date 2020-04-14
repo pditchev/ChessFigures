@@ -2,16 +2,9 @@
 
 bool Figure::check(FieldPointer fieldPtr, Board* instance)
 {
-  //  Field& field = instance->fields[position.first][position.second]; // for simplicity!!
-
- //   if (field.status == Occupied::NotOccupied)
-    bool res = instance->isOccupied(fieldPtr) == Occupied::NotOccupied;
-    if(res)
+    if(instance->isOccupied(fieldPtr) == Occupied::NotOccupied)
     {
-        //field.attemptedAttack = true;
-
         impacted.push_back(fieldPtr);
-
         return true;
     }
     else
@@ -19,52 +12,30 @@ bool Figure::check(FieldPointer fieldPtr, Board* instance)
     return false;
 }
 
-Figure::Figure(std::string name) : name(name) {
-    //impacted.reserve(32);
-}
+Figure::Figure(std::string name) : name(name) {}
 
-Figure::~Figure()
-{
-}
+Figure::~Figure(){}
 
 bool Figure::increaseAttackedState(FieldPointer fieldPtr, Board* board) {
 
     if (markImpactedFields(fieldPtr, board)) {
-        for (auto& field : impacted) {
- //           ++field->whiteAttacks;       // dealing only with white figures for now
-            board->attack(field, PieceColor::white);
+        for (auto& field : impacted)
+        {
+            board->attack(field, PieceColor::white);   // dealing only with white figures for now
         }
         impacted.clear();
         return true;
     }
     return false;
-
-    //bool success = markImpactedFields(position, board);
-
-    ////for (auto& field : board) {
-    //for (auto& field : impacted) {
-
-    //    if (success/* && field->attemptedAttack*/) {
-    //        ++field->whiteAttacks;       // dealing only with white figures for now
-    //    }
-    //    //field.attemptedAttack = false;
-    //}
-    //impacted.clear();
-    //return success;
 }
 
 void Figure::decreaseAttackedState(FieldPointer fieldPtr, Board* board) {
 
     markImpactedFields(fieldPtr, board);
 
-    for (auto& field : impacted) {
-        //for (auto& field : board) {
-
-         //   if (field.attemptedAttack) {
-        //--field->whiteAttacks;       // dealing only with white figures for now
-        board->removeAttack(field, PieceColor::white);
- //   }
- //   field.attemptedAttack = false;
+    for (auto& field : impacted)
+    {      
+        board->removeAttack(field, PieceColor::white);  // dealing only with white figures for now
     }
     impacted.clear();
 }

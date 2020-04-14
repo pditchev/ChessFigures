@@ -9,7 +9,6 @@
 #include "Rook.h"
 #include "Bishop.h"
 #include "Knight.h"
-//#include "Initializer.h"
 
 enum class Piece { Queen, Rook, Bishop, Knight };
 

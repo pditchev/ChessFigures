@@ -1,5 +1,4 @@
 #pragma once
-//typedef char uint8_t;
 
 enum class Occupied : uint8_t { NotOccupied, OccupiedByWhite, OccupiedByBlack };
 

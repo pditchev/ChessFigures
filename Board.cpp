@@ -71,8 +71,6 @@ public:
 		delete[] fields;
 	}
 
-	//std::pair<bool, PieceColor> isOccupied(FieldPtr)
-
 	Occupied isOccupied(FieldPointer f)
 	{	 
 		auto result = fields[f.getX()][f.getY()].status;
@@ -111,11 +109,7 @@ public:
 	{
 		fields[f.getX()][f.getY()].status = Occupied::NotOccupied;
 	}
-
-
 };
-
-
 
 std::pair<size_t, size_t> Board::getDimensions()
 {
@@ -171,4 +165,3 @@ FieldPointer Board::end()
 {
 	return FieldPointer{ _dimensions.first, 0 };
 }
-

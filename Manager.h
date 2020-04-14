@@ -12,8 +12,6 @@ class Manager
 
 	std::vector<Solution>   distinctSolutions;
 
-
-
 public:
 	Manager();
 	~Manager();
@@ -25,4 +23,3 @@ public:
 	int rows();
 	int cols();
 };
-

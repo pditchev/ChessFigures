@@ -1,7 +1,5 @@
 #include "FigureFactory.h"
 
-
-
 std::shared_ptr<Figure> FigureFactory::produceFigure(Piece piece) {
 
     switch (piece)
@@ -43,7 +41,7 @@ void FigureFactory::returnPiece(std::shared_ptr<Figure> piece) {
         piecesForThread.back().push(piece);
 }
 
-bool FigureFactory::dropPermutation() {
+bool FigureFactory::dropPermutation() {     // not used!
 
     piecesForThread.pop_back();
 

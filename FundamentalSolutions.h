@@ -7,7 +7,6 @@
 class FundamentalSolutions
 {
 private:
-	//Board* board;
 	std::pair<int, int> boardDimensions;
 
 	std::vector<Solution>& distincts;

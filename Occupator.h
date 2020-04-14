@@ -13,7 +13,8 @@ struct Occupator
 		:  fieldPtr(fieldPtr), figure(figure) {}
 
 
-	bool operator<(const Occupator& other) const {
+	bool operator<(const Occupator& other) const
+	{
 		if (fieldPtr.getX() < other.fieldPtr.getX())
 			return true;
 		else if (fieldPtr.getX() == other.fieldPtr.getX())
@@ -22,7 +23,8 @@ struct Occupator
 	}
 
 
-	friend std::ostream& operator<<(std::ostream& out, const Occupator& occupator) {
+	friend std::ostream& operator<<(std::ostream& out, const Occupator& occupator)
+	{
 
 		out << "(" << occupator.fieldPtr.getX() << ", "
 			<< occupator.fieldPtr.getY() << ") "
@@ -46,14 +48,9 @@ namespace std {
 		size_t operator()(const Occupator& occupator) const {
 			size_t seed = 0;
 			hash_combine(seed, occupator.figure->name);
-			//hash_combine(seed, occupator.position.first);
 			hash_combine(seed, occupator.fieldPtr.getX());
-
 			hash_combine(seed, occupator.fieldPtr.getY());
 			return seed;
 		}
 	};
 }
-
-
-

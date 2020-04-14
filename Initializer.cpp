@@ -94,4 +94,3 @@ void Initializer::noPermute() {
 	}
 	piecesRepo.push_back(help_stack);
 }
-
