@@ -6,27 +6,57 @@
 #include "Field.h"
 #include "Board.h"
 
-class Figure
+struct Initializer;
+
+enum class Piece { Queen, Rook, Bishop, Knight };
+
+class FigureBase {
+public:
+    FigureBase(Piece type) : type(type) {}
+    Piece type;
+
+    virtual bool check(const FieldPointer fieldPtr, const std::vector<Field>& fields) const = 0;
+    virtual void increaseAttackedState(const FieldPointer fieldPtr, std::vector<Field>& fields) const = 0;
+    virtual void decreaseAttackedState(const FieldPointer fieldPtr, std::vector<Field>& fields) const = 0;
+    virtual void initCache(const Initializer& i) const = 0;
+
+    virtual ~FigureBase(){}
+};
+
+template <typename T>       // CRTP
+class Figure : public FigureBase
 {
-private:
-
-    std::vector<FieldPointer> impacted;
-
-    virtual bool markImpactedFields(FieldPointer fieldPtr, Board* instance) = 0;
-
-protected:
-
-    bool check(FieldPointer fieldPtr, Board* instance);
 
 public:
+    virtual bool check(const FieldPointer fieldPtr, const std::vector<Field>& fields) const override
+    {
+        for (const auto& f : T::cache[fieldPtr])
+        {
+            if (fields[f].isOccupied() == true) { return false; }
+        }
+        return true;
+    }
 
-    Figure(std::string name);
+    virtual void increaseAttackedState(const FieldPointer fieldPtr, std::vector<Field>& fields) const override
+    {
+        for (const auto& f : T::cache[fieldPtr])
+        {
+            fields[f].attack();
+        }
+    }
 
-    ~Figure();
+    Figure() : FigureBase(T::type){}
 
-    std::string name;
+    virtual void decreaseAttackedState(const FieldPointer fieldPtr, std::vector<Field>& fields) const override
+    {
+        for (const auto& f : T::cache[fieldPtr])
+        {
+            fields[f].removeAttack();
+        }
+    }
 
-    bool increaseAttackedState(FieldPointer fieldPtr, Board* board);
-
-    void decreaseAttackedState(FieldPointer fieldPtr, Board* board);
+    virtual void initCache(const Initializer& i) const override
+    {
+        T::fillCache(i);
+    }
 };

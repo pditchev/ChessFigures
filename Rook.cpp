@@ -1,19 +1,32 @@
 #include "Rook.h"
+#include "Initializer.h"
 
-bool Rook::markImpactedFields(FieldPointer fieldPtr, Board* instance) {
+void Rook::fillCache(const Initializer& initializer)
+{
+    FieldPointer rows = initializer.boardDimensions.first;
+    FieldPointer cols = initializer.boardDimensions.second;
+    FieldPointer total_f = rows * cols;
 
-    for (size_t row = 0; row < instance->getRows(); row++)
+    for (FieldPointer f = 0; f < total_f; ++f)
     {
-        if (row == fieldPtr.getX()) continue;
-        if (!check(FieldPointer(row, fieldPtr.getY()), instance)) return false;
-    }
+        std::vector<FieldPointer> temp;
 
-    for (size_t col = 0; col < instance->getCols(); col++)
-    {
-        if (col == fieldPtr.getY()) continue;
-        if (!check(FieldPointer(fieldPtr.getX(), col), instance)) return false;
+        FieldPointer st = f % cols;  // put column into temp vector
+        for (FieldPointer i = st; i < total_f; i += cols)
+        {
+            if (i == f) continue;
+            temp.push_back(i);
+        }
+
+        // put row into temp vector
+        for (FieldPointer i = cols * (f / cols); i < cols * (f / cols + 1); ++i)
+        {
+            if (i == f) continue;
+            temp.push_back(i);
+        }
+
+        cache[f] = std::move(temp);
     }
-    return true;
 }
 
-Rook::Rook() : Figure("rook") {}
+std::unordered_map<FieldPointer, std::vector<FieldPointer>> Rook::cache;

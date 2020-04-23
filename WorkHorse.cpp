@@ -1,95 +1,128 @@
 #include "WorkHorse.h"
 
-void WorkHorse::cleanFigure(const SnapShotStruct snapshotStruct)
-{
-    snapshotStruct.figure->decreaseAttackedState(snapshotStruct.fieldPtr, board);  // ????
-    board->deoccupy(snapshotStruct.fieldPtr);
-}
+WorkHorse::WorkHorse(std::vector<std::stack<std::unique_ptr<FigureBase>
+    , std::vector<std::unique_ptr<FigureBase>>>> piecesForThread)
+    : board(&Board::getInstance())
+    , figFactory(new FigureFactory(std::move(piecesForThread)))
+    , fields(board->exposeFields()) {}
 
-
-WorkHorse::WorkHorse(std::vector<std::stack<std::shared_ptr<Figure>>> piecesForThread)
-    : board(&Board::getInstance()), figFactory(new FigureFactory(piecesForThread)) {}
 
 WorkHorse::~WorkHorse()
 {
     delete figFactory;
 }
 
-WorkHorse::SnapShotStruct::SnapShotStruct(std::shared_ptr<Figure> figure, FieldPointer passedField)
-    : figure(figure), fieldPtr(passedField) {}
+WorkHorse::SnapShotStruct::SnapShotStruct(SnapShotStruct&& other) noexcept
+    : figure(std::move(other.figure)), fieldPtr(other.fieldPtr), stage(other.stage) {}
+
+WorkHorse::SnapShotStruct& WorkHorse::SnapShotStruct::operator=(SnapShotStruct&& other) noexcept
+{
+    if (this == &other) return *this;
+    stage = other.stage;
+    fieldPtr = other.fieldPtr;
+    figure = std::move(other.figure);
+    return *this;
+}
+
+WorkHorse::SnapShotStruct::SnapShotStruct(std::unique_ptr<FigureBase> figure, FieldPointer passedField)
+    : figure(std::move(figure)), fieldPtr(passedField) {}
+
 
 void WorkHorse::startIter() {
 
-    std::stack<SnapShotStruct> snapshots;
+    std::stack<SnapShotStruct, std::vector<SnapShotStruct>> snapshots;
 
     SnapShotStruct firstSnapShot(nullptr, board->begin());  // starts at [0][0] without figure
 
-    snapshots.push(firstSnapShot);
+    snapshots.push(std::move(firstSnapShot));
 
     while (!snapshots.empty())
     {
-        auto currentSnapShot = snapshots.top();
+        auto currentSnapShot = std::move(snapshots.top());
         snapshots.pop();
 
         if (nullptr == currentSnapShot.figure) currentSnapShot.figure = figFactory->getNextPiece();
 
         switch (currentSnapShot.stage) {
         case 0:
-            if (walkingOnTheBoard(currentSnapShot)) {
+        {
+            bool success = tryToPlace(currentSnapShot);
+            if (true == success)
+            {
+                auto currentFieldPtr = currentSnapShot.fieldPtr;
+                auto currentFigureType = currentSnapShot.figure->type;
+
+                solution.emplace_back(currentFieldPtr, currentFigureType);
 
                 currentSnapShot.stage = 1;
-                snapshots.push(currentSnapShot);
+                snapshots.push(std::move(currentSnapShot));
 
-                solution.push_back(Occupator(currentSnapShot.fieldPtr, currentSnapShot.figure));
-
-                if (auto nextFigure = figFactory->getNextPiece(); !nextFigure) {
-                    distinctSolutions.push_back(solution);
+                if (auto nextFigure = figFactory->getNextPiece())  // any pieces left??
+                {
+                    if (currentFigureType == nextFigure->type)     // if not same type, start from begin!
+                    {
+                        snapshots.emplace(std::move(nextFigure), ++currentFieldPtr);
+                    }
+                    else snapshots.emplace(std::move(nextFigure), board->begin());
                 }
-                else if (typeid(*currentSnapShot.figure) == typeid(*nextFigure)) {
-                    snapshots.push(SnapShotStruct(nextFigure, ++currentSnapShot.fieldPtr));
-                }
-                else snapshots.push(SnapShotStruct(nextFigure, board->begin()));
+                else distinctSolutions.push_back(solution);
             }
             break;
-
+        }
         case 1:
 
             solution.pop_back();    // rolling back!
+            unboardFigure(currentSnapShot);
 
-            cleanFigure(currentSnapShot);
+            ++currentSnapShot.fieldPtr; // and go to the next field!
 
-            if (++currentSnapShot.fieldPtr == board->end())
+            if (currentSnapShot.fieldPtr < board->end())
             {
-                figFactory->returnPiece(currentSnapShot.figure);
-                break;    // go to the end of the for loop after recuring from "recursion"
+                currentSnapShot.stage = 0;  // one more "recursive" loop
+                snapshots.emplace(std::move(currentSnapShot));
+                break;
             }
-            currentSnapShot.stage = 0;
-            snapshots.push(currentSnapShot);
 
-            break;
+            figFactory->returnPiece(std::move(currentSnapShot.figure)); // this loop is dying
+            break;         
         }
     }
 }
 
-bool WorkHorse::walkingOnTheBoard(WorkHorse::SnapShotStruct& currentSnapShot)
+bool WorkHorse::tryToPlace(WorkHorse::SnapShotStruct& currentSnapShot)
 {
-    for (auto fieldPtr = currentSnapShot.fieldPtr; ; ++fieldPtr) {
-
+    for (auto fieldPtr = currentSnapShot.fieldPtr; ; ++fieldPtr)
+    {
         if (fieldPtr == board->end()) {
-            figFactory->returnPiece(currentSnapShot.figure);
+            figFactory->returnPiece(std::move(currentSnapShot.figure));
             return false;
         }
 
-        if(board->isOccupied(fieldPtr) == Occupied::NotOccupied
-            && !board->isAttacked(fieldPtr).first   // by blacks
-            && !board->isAttacked(fieldPtr).second  // by whites
-            && currentSnapShot.figure->increaseAttackedState(fieldPtr, board))
+        if(possiblePlacement(*currentSnapShot.figure, fieldPtr))
         {
-            board->occupy(fieldPtr, PieceColor::white);     // for now only whites
+            fields[fieldPtr].occupy();
+            currentSnapShot.figure->increaseAttackedState(fieldPtr, fields);
             currentSnapShot.fieldPtr = fieldPtr;
             return true;
         }
     }
+}
+
+bool WorkHorse::possiblePlacement(const FigureBase& figure, FieldPointer where)
+{
+    if(     fields[where].isOccupied() == false
+         && fields[where].isAttacked() == false
+         && figure.check(where, fields) == true)
+    {
+        return true;
+    }
+    return false;
+}
+
+void WorkHorse::unboardFigure(SnapShotStruct& snapshotStruct)
+{
+    fields[snapshotStruct.fieldPtr].deoccupy();
+    snapshotStruct.figure->decreaseAttackedState(snapshotStruct.fieldPtr, fields); 
 }
 
 std::vector<Solution> WorkHorse::getDistinctSolutions() {

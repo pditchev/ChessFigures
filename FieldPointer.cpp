@@ -16,6 +16,13 @@ FieldPointer::FieldPointer(size_t X, size_t Y)
 	, cols(Board::getInstance().getDimensions().second)
 {}
 
+FieldPointer::FieldPointer(size_t X, size_t Y, size_t rows, size_t cols)
+	: pos_X(X)
+	, pos_Y(Y)
+	, rows(rows)
+	, cols(cols)
+{}
+
 size_t FieldPointer::getX() const
 {
 	return pos_X;

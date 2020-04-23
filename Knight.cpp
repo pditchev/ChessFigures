@@ -1,15 +1,29 @@
 #include "Knight.h"
+#include "Initializer.h"
 
-bool Knight::markImpactedFields(FieldPointer fieldPtr, Board* instance) {
+void Knight::fillCache(const Initializer& initializer)
+{
+    FieldPointer rows = initializer.boardDimensions.first;
+    FieldPointer cols = initializer.boardDimensions.second;
+    FieldPointer total_f = rows * cols;
 
-    for (auto f : att) {
-        int row = fieldPtr.getX() + f.first;
-        int col = fieldPtr.getY() + f.second;
-        if (row >= 0 && row < instance->getRows() && col >= 0 && col < instance->getCols()) {
-            if (!check(FieldPointer(row, col), instance)) return false;
+    for (FieldPointer f = 0; f < total_f; ++f)
+    {
+        std::vector<FieldPointer> temp;
+
+        for (const auto& c : att)
+        {
+            auto row = f / cols + c.first;
+            auto col = f % cols + c.second;
+
+            if (row >= 0 && row < rows && col >= 0 && col < cols)
+            {
+                temp.push_back(row * cols + col);
+            }
         }
+
+        cache[f] = std::move(temp);
     }
-    return true;
 }
 
-Knight::Knight() : Figure("knight") {}
+std::unordered_map<FieldPointer, std::vector<FieldPointer>> Knight::cache;

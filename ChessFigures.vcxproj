@@ -155,10 +155,8 @@
     <ClCompile Include="Bishop.cpp" />
     <ClCompile Include="Board.cpp" />
     <ClCompile Include="ChessFigures.cpp" />
-    <ClCompile Include="FieldPointer.cpp" />
     <ClCompile Include="Figure.cpp" />
     <ClCompile Include="FigureFactory.cpp" />
-    <ClCompile Include="FundamentalSolutions.cpp" />
     <ClCompile Include="Initializer.cpp" />
     <ClCompile Include="Knight.cpp" />
     <ClCompile Include="Manager.cpp" />
@@ -172,10 +170,8 @@
     <ClInclude Include="Bishop.h" />
     <ClInclude Include="Board.h" />
     <ClInclude Include="Field.h" />
-    <ClInclude Include="FieldPointer.h" />
     <ClInclude Include="Figure.h" />
     <ClInclude Include="FigureFactory.h" />
-    <ClInclude Include="FundamentalSolutions.h" />
     <ClInclude Include="Initializer.h" />
     <ClInclude Include="Knight.h" />
     <ClInclude Include="Manager.h" />

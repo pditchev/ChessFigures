@@ -1,44 +1,45 @@
 #include "FigureFactory.h"
 
-std::shared_ptr<Figure> FigureFactory::produceFigure(Piece piece) {
+std::unique_ptr<FigureBase> FigureFactory::produceFigure(Piece piece) {
 
     switch (piece)
     {
     case Piece::Queen:
-        return std::make_shared<Queen>();
+        return std::make_unique<Queen>();
         break;
     case Piece::Rook:
-        return std::make_shared<Rook>();
+        return std::make_unique<Rook>();
         break;
     case Piece::Bishop:
-        return std::make_shared<Bishop>();
+        return std::make_unique<Bishop>();
         break;
     case Piece::Knight:
-        return std::make_shared<Knight>();
+        return std::make_unique<Knight>();
         break;
     default:
         break;
     }
 }
 
-FigureFactory::FigureFactory(std::vector<std::stack<std::shared_ptr<Figure>>> piecesForThread)
-    : piecesForThread(piecesForThread) {}
+FigureFactory::FigureFactory(std::vector<std::stack<std::unique_ptr<FigureBase>
+    , std::vector<std::unique_ptr<FigureBase>>>> piecesForThread)
+    : piecesForThread(std::move(piecesForThread)) {}
 
 
-std::shared_ptr<Figure> FigureFactory::getNextPiece() {
+std::unique_ptr<FigureBase> FigureFactory::getNextPiece() {
     if (piecesForThread.back().empty()) {
         return nullptr;
     }
     else {
-        auto result = piecesForThread.back().top();
+        auto result = std::move(piecesForThread.back().top());  // moved!!
         piecesForThread.back().pop();
         return result;
     }
 }
 
-void FigureFactory::returnPiece(std::shared_ptr<Figure> piece) {
+void FigureFactory::returnPiece(std::unique_ptr<FigureBase> piece) {
     if (piece)
-        piecesForThread.back().push(piece);
+        piecesForThread.back().push(std::move(piece));  // moved
 }
 
 bool FigureFactory::dropPermutation() {     // not used!

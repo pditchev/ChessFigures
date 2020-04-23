@@ -7,11 +7,15 @@
 
 class Solution : private std::vector<Occupator>
 {
+	size_t rows = Board::getInstance().getRows();
+	size_t cols = Board::getInstance().getCols();
+
 public:
 	typedef std::vector<Occupator> Vector;
 
 	using Vector::at;
 	using Vector::push_back;
+	using Vector::emplace_back;
 	using Vector::pop_back;
 	using Vector::begin;
 	using Vector::end;
@@ -26,11 +30,44 @@ public:
 
 		for (size_t i = 0; i < this->size(); i++)
 		{
-			if (this->at(i).figure->name != other[i].figure->name) return false;
-			if (this->at(i).fieldPtr.getX() != other[i].fieldPtr.getX()) return false;
-			if (this->at(i).fieldPtr.getY() != other[i].fieldPtr.getY()) return false;
+			if (this->at(i).type != other[i].type) return false;
+			if (this->at(i).fieldPtr != other[i].fieldPtr) return false;
 		}
 		return true;
+	}
+
+	friend std::ostream& operator<<(std::ostream& out, const Solution& sol)
+	{
+		std::vector<char>b(sol.rows * sol.cols, '*');
+
+		for (const auto& occ : sol)
+		{
+			switch (occ.type)
+			{
+			case Piece::Queen:
+				b[occ.fieldPtr] = 'Q';
+				break;
+			case Piece::Rook:
+				b[occ.fieldPtr] = 'R';
+				break;
+			case Piece::Bishop:
+				b[occ.fieldPtr] = 'B';
+				break;
+			case Piece::Knight:
+				b[occ.fieldPtr] = 'K';
+				break;
+			}
+		}
+
+		auto cntr = 0;
+		for (auto& ch : b)
+		{
+			out << ch << ' ';
+			if (!(++cntr % sol.cols))	out << '\n';
+		}
+
+		out << '\n' << '\n';
+		return out;
 	}
 };
 

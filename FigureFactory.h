@@ -10,19 +10,18 @@
 #include "Bishop.h"
 #include "Knight.h"
 
-enum class Piece { Queen, Rook, Bishop, Knight };
 
 class FigureFactory {
-    std::vector<std::stack<std::shared_ptr<Figure>>> piecesForThread;
+    std::vector<std::stack<std::unique_ptr<FigureBase>, std::vector<std::unique_ptr<FigureBase>>>> piecesForThread;
 
 public:
-    static std::shared_ptr<Figure> produceFigure(Piece piece);
+    static std::unique_ptr<FigureBase> produceFigure(Piece piece);
 
-    FigureFactory(std::vector<std::stack<std::shared_ptr<Figure>>> piecesForThread);
+    FigureFactory(std::vector<std::stack<std::unique_ptr<FigureBase>, std::vector<std::unique_ptr<FigureBase>>>> piecesForThread);
 
-    std::shared_ptr<Figure> getNextPiece();
+    std::unique_ptr<FigureBase> getNextPiece();
 
-    void returnPiece(std::shared_ptr<Figure> piece);
+    void returnPiece(std::unique_ptr<FigureBase> piece);
 
     bool dropPermutation();
 };

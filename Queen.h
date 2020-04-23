@@ -1,9 +1,14 @@
 #pragma once
 #include "Figure.h"
+#include <map>
+#include <unordered_map>
 
-class Queen : public Figure {
-    virtual bool markImpactedFields(FieldPointer fieldPtr, Board* instance) override;
+struct Initializer;
 
-public:
-    Queen();
+class Queen : public Figure<Queen>
+{
+    static void fillCache(const Initializer& initializer);
+    static std::unordered_map<FieldPointer, std::vector<FieldPointer>> cache;
+    static const Piece type = Piece::Queen;
+    friend Figure;
 };

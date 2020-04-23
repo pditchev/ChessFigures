@@ -14,7 +14,6 @@ void Manager::work() {
 
 	permPerThread = initializer.piecesRepo.size() / noOfThreads + 1;
 
-	std::vector<std::stack<std::shared_ptr<Figure>>> piecesForThread;
 	std::vector<std::thread> threads(noOfThreads);
 	std::vector<WorkHorse*> horses(noOfThreads);
 
@@ -22,12 +21,15 @@ void Manager::work() {
 
 	for (size_t i = 0; i < noOfThreads; i++)
 	{
-		auto piecesEnd = piecesBegin + permPerThread;
+		std::vector<std::stack<std::unique_ptr<FigureBase>
+			, std::vector<std::unique_ptr<FigureBase>>>> piecesForThread;
+		auto piecesEnd = std::next(piecesBegin, permPerThread);
 		if (i == noOfThreads - 1) piecesEnd = initializer.piecesRepo.end();
-		piecesForThread.assign(piecesBegin, piecesEnd);
+//		piecesForThread.assign(piecesBegin, piecesEnd);
+		std::move(piecesBegin, piecesEnd, std::back_inserter(piecesForThread));
 		if (piecesForThread.empty()) break;
 
-		horses[i] = new WorkHorse(piecesForThread);
+		horses[i] = new WorkHorse(std::move(piecesForThread));
 
 		threads[i] = std::thread(&WorkHorse::startIter, horses[i]);
 

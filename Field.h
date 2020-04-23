@@ -1,15 +1,23 @@
 #pragma once
 
-enum class Occupied : uint8_t { NotOccupied, OccupiedByWhite, OccupiedByBlack };
-
 struct Field {
-
-    uint8_t whiteAttacks;
-    uint8_t blackAttacks;
-    Occupied status;
-
-    Field() : whiteAttacks(0)
-        , blackAttacks(0)
-        , status(Occupied::NotOccupied)
-    {}
+    unsigned char value{ 0 };
+    bool isOccupied() const {
+        return value & 128;
+    }
+    bool isAttacked() const {
+        return value << 1;
+    }
+    void occupy() {
+        value |= 128;
+    }
+    void deoccupy() {
+        value &= 127;
+    }
+    void attack() {
+        value++;
+    }
+    void removeAttack() {
+        value--;
+    }
 };

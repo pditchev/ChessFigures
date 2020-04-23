@@ -13,6 +13,9 @@ public:
 
 	FieldPointer(size_t X, size_t Y);
 
+	FieldPointer(size_t X, size_t Y, size_t rows, size_t cols);
+
+
 	size_t getX() const;
 
 	size_t getY() const;
